@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bars, Xmark } from "@gravity-ui/icons";
-import { authClient } from "@/lib/auth-client";
+import {  useSession } from "@/lib/auth-client";
 import NavbarProfileDropdown from "./NavbarProfileDropdown";
 
 // ৩টি রোল ডিফাইন করা হলো: buyer, seller, admin
@@ -18,8 +18,10 @@ interface AuthUser {
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } =useSession();
   const user = session?.user as AuthUser | undefined;
+
+  console.log("User", user)
 
 
   if (pathname.includes("dashboard")) {
