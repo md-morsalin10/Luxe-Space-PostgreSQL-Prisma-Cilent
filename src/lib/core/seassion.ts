@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
-import { auth } from "../auth";
 import { headers } from "next/headers";
-
+import { authClient } from "../auth-client"; // আপনার authClient ইম্পোর্ট করুন
 
 interface SessionUser {
   id: string;
@@ -10,27 +9,28 @@ interface SessionUser {
   role: "admin" | "seller" | "buyer";
 }
 
-
 export const getUserSession = async (): Promise<SessionUser | null> => {
-  const session = await auth.api.getSession({
-    headers: await headers()
+  // Server-side এ headers পাস করেgetSession নিতে হয়
+  const { data: session } = await authClient.getSession({
+    fetchOptions: {
+      headers: await headers(),
+    },
   });
 
   return (session?.user as SessionUser) || null;
-}
+};
 
-
-export const verifyRole = async (role: "admin" | "seller" | "buyer"): Promise<void> => {
+export const verifyRole = async (
+  role: "admin" | "seller" | "buyer"
+): Promise<void> => {
   const user = await getUserSession();
   console.log(user, "from verifyRole");
-
 
   if (!user) {
     redirect("/login");
   }
 
-
   if (user.role !== role) {
     redirect("/unauthorized");
   }
-}
+};

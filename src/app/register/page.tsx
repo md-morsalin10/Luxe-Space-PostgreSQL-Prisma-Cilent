@@ -60,7 +60,7 @@ const RegisterPage = () => {
         password: formData.password,
         image: formData.avatarUrl?.trim() || undefined,
         role: formData.role,
-      });
+      } as any);
 
       if (error) {
         console.error("SignUp error response:", error);

@@ -27,7 +27,6 @@
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
     "@tailwindcss/postcss": "^4.3.3",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "^1.6.26",
@@ -44,7 +43,6 @@
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "prisma": "^7.9.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2"
   }

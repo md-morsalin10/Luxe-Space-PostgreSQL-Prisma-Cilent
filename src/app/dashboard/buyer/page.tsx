@@ -1,8 +1,9 @@
 import { getPaymentDataById } from '@/lib/api/propertyPayment';
-import { auth } from '@/lib/auth';
+
 import { headers } from 'next/headers';
 import React from 'react';
 import DashboardClient from './DashboardClient';
+import { useSession } from '@/lib/auth-client';
 
 
 interface AuthUser {
@@ -32,9 +33,7 @@ interface PaymentProperty {
 
 const UserDashboard = async () => {
     const headersList = await headers();
-    const session = await auth.api.getSession({
-        headers: headersList
-    });
+    const session = await useSession();
     const user = session?.user as AuthUser | undefined;
 
     // ডাটা সার্ভার সাইড থেকে ফেচ করা হচ্ছে
