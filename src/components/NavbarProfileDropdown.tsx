@@ -1,11 +1,12 @@
 "use client";
 import React from "react";
-import { authClient } from "@/lib/auth-client";
+import { authClient, signOut, useSession } from "@/lib/auth-client";
 import { ArrowRightFromSquare, LayoutSideContent } from "@gravity-ui/icons";
 import { Dropdown } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+
 
 interface AuthUser {
   id: string;
@@ -20,12 +21,12 @@ interface AuthUser {
 
 const NavbarProfileDropdown: React.FC = () => {
     const router = useRouter();
-    const { data: session } = authClient.useSession();
+    const { data: session } = useSession();
     const user = session?.user as AuthUser | undefined;
 
     const handleSignOut = async (): Promise<void> => {
         try {
-            await authClient.signOut();
+            await signOut();
             router.push("/");
         } catch (error) {
             console.error("Sign out failed:", error);
@@ -39,7 +40,7 @@ const NavbarProfileDropdown: React.FC = () => {
     return (
         <div className="flex items-center">
             <Dropdown >
-                {/* Trigger Avatar: এরর এড়াতে button পরিবর্তন করে div করা হয়েছে */}
+              
                 <Dropdown.Trigger>
                     <div className="w-10 h-10 rounded-full cursor-pointer ring-2 ring-gray-800 hover:ring-[#E5BA73]/60 transition-all duration-200 p-[2px] flex items-center justify-center bg-[#1A202C] min-w-[40px] min-h-[40px] overflow-hidden outline-none">
                         {user?.image ? (
@@ -49,7 +50,7 @@ const NavbarProfileDropdown: React.FC = () => {
                                 src={user.image} 
                                 alt={user?.name || "Avatar"} 
                                 className="w-full h-full object-cover rounded-full"
-                                unoptimized // Imgbb-এর মত এক্সটার্নাল লিংকের ক্ষেত্রে নেক্সট ইমেজ অপ্টিমাইজেশন এরর আটকাতে এটি সেফ
+                                unoptimized
                             />
                         ) : (
                             <span className="text-[#E5BA73] font-serif font-bold text-sm select-none">
