@@ -1,9 +1,7 @@
 import { getPropertyBySellerId } from '@/lib/api/property';
-import { getPaymentDataSellerId } from '@/lib/api/propertyPayment';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
-import React from 'react';
+
 import SellerDashboardClient from './SellerDashboardClient';
+import { getSessionOnServer } from '@/lib/auth-server';
 
 interface AuthUser {
     id: string;
@@ -14,17 +12,20 @@ interface AuthUser {
 }
 
 const SellerDashboard = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const session = await getSessionOnServer()
+    if (!session) {
+        return null
+    }
 
     const seller = session?.user as AuthUser | undefined;
     const sellerId = seller?.id as string;
 
     // অবজেক্ট আকারে { sellerId } পাস করে প্যারালালি ডেটা ফেচিং করা হলো
     const [soldPropertiesData, allPropertiesData] = await Promise.all([
-        getPaymentDataSellerId(sellerId) || [],
-        getPropertyBySellerId({ sellerId }) || []
+        // getPaymentDataSellerId(sellerId) || [],
+        // getPropertyBySellerId({ sellerId }) || []
+        [],
+        []
     ]);
     // সোল্ড প্রোপার্টি বা পেমেন্ট ডাটা ফরম্যাটিং
     const formattedSold = soldPropertiesData.map((s: any) => ({

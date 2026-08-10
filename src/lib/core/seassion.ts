@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { authClient } from "../auth-client"; // আপনার authClient ইম্পোর্ট করুন
+import { authClient } from "../auth-client"; 
+import { getSessionOnServer } from "../auth-server";
 
 interface SessionUser {
   id: string;
@@ -11,12 +12,7 @@ interface SessionUser {
 
 export const getUserSession = async (): Promise<SessionUser | null> => {
   // Server-side এ headers পাস করেgetSession নিতে হয়
-  const { data: session } = await authClient.getSession({
-    fetchOptions: {
-      headers: await headers(),
-    },
-  });
-
+  const session = await getSessionOnServer()
   return (session?.user as SessionUser) || null;
 };
 

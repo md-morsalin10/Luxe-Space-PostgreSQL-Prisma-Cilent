@@ -4,9 +4,8 @@ import React, { useState } from "react";
 import { Form, TextField, Label, Input, TextArea, Select, ListBox, Button, FieldError } from "@heroui/react";
 import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
+import { createProperty } from "@/lib/action/property";
 
-// dynamic function handle করার জন্য আপনার নিজস্ব অ্যাকশন পাথ অনুযায়ী ইমপোর্ট করবেন
-// import { createProperty } from "@/lib/action/properties"; 
 
 export default function AddProperty() {
   const [loading, setLoading] = useState(false);
@@ -45,15 +44,19 @@ export default function AddProperty() {
       setLoading(false);
       return;
     }
-    
-    const baseUrl = process.env.NEXT_PUBLIC_URL  // আপনার সার্ভারের URL
-    // ১. imgBB তে ছবি আপলোড করার প্রসেস
+
     const imgData = new FormData();
     imgData.append("image", propertyImageFile);
-    
 
     try {
       const imgBbKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+
+      if (!imgBbKey) {
+        toast.error("ImgBB API Key dynamic environment variable is missing!");
+        setLoading(false);
+        return;
+      }
+
       const imgBbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${imgBbKey}`, {
         method: "POST",
         body: imgData,
@@ -63,7 +66,6 @@ export default function AddProperty() {
       if (imgBbResult.success) {
         const imageUrl = imgBbResult.data.display_url;
 
-        // ২. রিয়েল এস্টেট অবজেক্ট স্কিমা
         const propertyData = {
           title,
           type,
@@ -71,34 +73,23 @@ export default function AddProperty() {
           location,
           bedrooms: parseInt(bedrooms as string),
           bathrooms: parseInt(bathrooms as string),
-          area: parseInt(area as string), // Sq Ft
+          area: parseInt(area as string),
           description,
           image: imageUrl,
           status: "available",
           dateUploaded: new Date().toISOString(),
-          sellerId: user?.id,
-          sellerName: user?.name,
-          sellerEmail: user?.email,
+          ownerId: user?.id,
         };
 
-        console.log("Submitting Property Data:", propertyData);
+     
+        const result = await createProperty(propertyData);
 
-        const response = await fetch(`${baseUrl}/api/property`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(propertyData),
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.insertedId) {
+        if (result) {
           toast.success("Property added successfully!");
           form.reset();
           setFileName("");
         } else {
-          toast.error(result.message || "Failed to save property in database.");
+          toast.error("Failed to save property in database.");
         }
       } else {
         toast.error("Image upload failed.");
@@ -110,6 +101,8 @@ export default function AddProperty() {
       setLoading(false);
     }
   };
+
+
   return (
     <div className="min-h-screen bg-white text-[#0f172a] flex items-center justify-center p-4">
       <div className="w-full max-w-2xl bg-white border border-gray-100 p-8 rounded-2xl shadow-xl">

@@ -5,7 +5,7 @@ export const getPropertyBySellerId = async ({ sellerId }: { sellerId: string }) 
 };
 
 export const getAllProperties = async () => {
-    return await serverFetch(`/api/property`);
+    return await serverFetch<{ success: boolean; message: string; data: Property[] }>(`/api/property`);
 };
 
 export const getPropertyById = async ({ propertyId }: { propertyId: string }) => {

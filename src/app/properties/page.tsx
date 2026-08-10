@@ -5,8 +5,10 @@ import { Property } from '@/components/PropertyCard';
 
 const PropertyPage = async () => {
     const allProperty = await getAllProperties();
-    // নিশ্চিত হওয়া যে ডেটা সঠিক অ্যারে ফরম্যাটে আছে
-    const properties: Property[] = Array.isArray(allProperty) ? allProperty : [];
+    console.log(allProperty, "property")
+    
+    const properties: Property[] = allProperty?.data || [];
+   
 
     return <PropertiesClient initialProperties={properties} />;
 };

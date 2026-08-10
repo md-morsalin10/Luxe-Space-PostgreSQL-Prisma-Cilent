@@ -21,7 +21,7 @@ const Navbar = () => {
   const { data: session, isPending } =useSession();
   const user = session?.user as AuthUser | undefined;
 
-  console.log("User", user)
+  // console.log("User", user)
 
 
   if (pathname.includes("dashboard")) {

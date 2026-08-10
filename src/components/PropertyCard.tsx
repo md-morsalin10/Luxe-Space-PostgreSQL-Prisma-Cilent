@@ -28,7 +28,7 @@ interface PropertyCardProps {
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   return (
-    <Link href={`/properties/${property._id}`} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer">
+    <Link href={`/properties/${property.id}`} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group cursor-pointer">
       {/* Image Section */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
         <img

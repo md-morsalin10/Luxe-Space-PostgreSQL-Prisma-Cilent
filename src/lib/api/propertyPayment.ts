@@ -4,6 +4,6 @@ export const getPaymentDataById = async (userId: string) => {
     return serverFetch(`/api/payment?userId=${userId}`);
 }
 
-export const getPaymentDataSellerId = async (sellerId: string) => {
-    return serverFetch(`/api/payment?sellerId=${sellerId}`);
-}
+// export const getPaymentDataSellerId = async (sellerId: string) => {
+//     return serverFetch(`/api/payment?sellerId=${sellerId}`);
+// }
