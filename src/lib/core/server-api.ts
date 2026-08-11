@@ -1,39 +1,27 @@
-export interface PropertyOwner {
-  id: string;
-  name: string;
-  email: string;
-  image?: string | null;
-}
+// Core server fetch utility.
+// Type definitions have been moved to @/types/property — import from there.
+// This file keeps the `serverFetch` helper and re-exports the Property type
+// so existing imports of `Property` from this path keep working.
 
-export interface Property {
-  id: string;
-  title: string;
-  type: string;
-  price: number;
-  location: string;
-  bedrooms: number;
-  bathrooms: number;
-  area: number;
-  description?: string | null;
-  image?: string | null;
-  status: string;
-  dateUploaded: string; // backend theke ISO Date string asbe
-  ownerId: string;
-  owner?: PropertyOwner; 
-  buyerId?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
+export type { Property, Seller } from "@/types/property";
 
 const baseUrl = process.env.NEXT_PUBLIC_URL;
 
-export const serverFetch = async <T = Property[]>(path: string): Promise<T> => {
+export const serverFetch = async <T = unknown>(path: string): Promise<T> => {
+  if (!baseUrl) {
+    throw new Error(
+      "NEXT_PUBLIC_URL environment variable is not set. Cannot fetch from the API server."
+    );
+  }
+
   const res = await fetch(`${baseUrl}${path}`, {
     cache: "no-store",
   });
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch data from ${path}`);
+    throw new Error(
+      `Failed to fetch from ${path} — HTTP ${res.status} ${res.statusText}`
+    );
   }
 
   return res.json() as Promise<T>;

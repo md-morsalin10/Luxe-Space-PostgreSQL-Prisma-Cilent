@@ -1,31 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ZAxis, ResponsiveContainer } from 'recharts';
+import {
+    ScatterChart, Scatter, XAxis, YAxis, CartesianGrid,
+    Tooltip, ZAxis, ResponsiveContainer,
+} from 'recharts';
 import { BiDollarCircle, BiBuildingHouse, BiCheckCircle, BiGridAlt, BiUser } from 'react-icons/bi';
 import gsap from 'gsap';
-
-interface SoldProperty {
-    _id: string;
-    title: string;
-    price: number;
-    type: string;
-    location: string;
-    image: string;
-    buyerName: string;
-    buyerEmail: string;
-    createdAt: string;
-}
-
-interface AllProperty {
-    _id: string;
-    title: string;
-    type: string;
-    price: number;
-    location: string;
-    status: string;
-    image: string;
-}
+import type { SoldProperty, AllProperty } from '@/types/property';
 
 interface SellerDashboardClientProps {
     sellerName: string;
@@ -33,8 +15,16 @@ interface SellerDashboardClientProps {
     allProperties: AllProperty[];
 }
 
+interface TooltipPayload {
+    payload: {
+        title: string;
+        price: number;
+        type: string;
+        dateStr: string;
+    };
+}
 
-const CustomScatterTooltip = ({ active, payload }: any) => {
+const CustomScatterTooltip = ({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
@@ -65,22 +55,20 @@ const CustomScatterTooltip = ({ active, payload }: any) => {
 const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: SellerDashboardClientProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-
-    const totalEarnings = soldProperties.reduce((acc, curr) => acc + curr.price, 0);
+    const totalEarnings  = soldProperties.reduce((acc, curr) => acc + curr.price, 0);
     const activeListings = allProperties.filter(p => p.status === 'available').length;
-    const unitsSold = soldProperties.length;
-
+    const unitsSold      = soldProperties.length;
 
     const scatterData = [...soldProperties]
         .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
         .map((item, index) => ({
-            id: item._id,
-            index: index + 1,
-            price: item.price,
-            title: item.title,
-            type: item.type,
+            id:      item.id,
+            index:   index + 1,
+            price:   item.price,
+            title:   item.title,
+            type:    item.type,
             dateStr: new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-            size: item.price
+            size:    item.price,
         }));
 
     useEffect(() => {
@@ -101,7 +89,6 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
         <div ref={containerRef} className="min-h-screen bg-[#F9FAFB] text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
 
-
                 <div className="mb-10 border-b border-slate-200 pb-6">
                     <span className="text-[11px] font-bold text-[#C9A227] tracking-[0.2em] uppercase">Seller Portal</span>
                     <h1 className="text-3xl font-serif font-bold tracking-tight text-slate-900 mt-1">
@@ -111,7 +98,6 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
                         Track your listing status, monitor deal liquidations, and analyze gross revenue metrics.
                     </p>
                 </div>
-
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div className="seller-stat opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
@@ -147,11 +133,10 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-
                     <div className="seller-card opacity-0 lg:col-span-2 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
                         <div className="mb-6 flex items-center justify-between">
                             <div>
-                                <h3 className="text-sm font-bold text-slate-900">Liquidation Matrix & Capital Scatter</h3>
+                                <h3 className="text-sm font-bold text-slate-900">Liquidation Matrix &amp; Capital Scatter</h3>
                                 <p className="text-slate-400 text-[11px]">Visual distribution of premium asset scale relative to deal valuation flow</p>
                             </div>
                             <BiGridAlt className="text-[#C9A227] w-5 h-5" />
@@ -163,18 +148,26 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
                                 <ResponsiveContainer width="100%" height="100%">
                                     <ScatterChart margin={{ top: 15, right: 15, left: -20, bottom: 0 }}>
                                         <CartesianGrid stroke="#F8FAFC" strokeDasharray="4 4" />
-
-
-                                        <XAxis type="number" dataKey="index" name="Timeline Sequence" stroke="#94A3B8" tickLine={false} axisLine={false} tickFormatter={(val) => `Deal #${val}`} />
-
-                                        <YAxis type="number" dataKey="price" name="Valuation" stroke="#94A3B8" tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
-
-
+                                        <XAxis
+                                            type="number"
+                                            dataKey="index"
+                                            name="Timeline Sequence"
+                                            stroke="#94A3B8"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickFormatter={(val: number) => `Deal #${val}`}
+                                        />
+                                        <YAxis
+                                            type="number"
+                                            dataKey="price"
+                                            name="Valuation"
+                                            stroke="#94A3B8"
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickFormatter={(val: number) => `$${val / 1000}k`}
+                                        />
                                         <ZAxis type="number" dataKey="size" range={[80, 450]} />
-
                                         <Tooltip content={<CustomScatterTooltip />} cursor={{ strokeDasharray: '3 3', stroke: '#cbd5e1' }} />
-
-
                                         <Scatter
                                             name="Properties"
                                             data={scatterData}
@@ -189,7 +182,6 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
                         </div>
                     </div>
 
-
                     <div className="seller-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col">
                         <div className="mb-4">
                             <h3 className="text-sm font-bold text-slate-900">Recent Buyers</h3>
@@ -200,7 +192,7 @@ const SellerDashboardClient = ({ sellerName, soldProperties, allProperties }: Se
                                 <div className="h-full flex items-center justify-center text-slate-400 text-xs py-12">No current buyers found.</div>
                             ) : (
                                 soldProperties.map((sold) => (
-                                    <div key={sold._id} className="flex items-start gap-3 p-3 bg-slate-50/70 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
+                                    <div key={sold.id} className="flex items-start gap-3 p-3 bg-slate-50/70 border border-slate-100 rounded-xl hover:bg-slate-50 transition-colors">
                                         <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs shrink-0">
                                             <BiUser className="w-4 h-4" />
                                         </div>

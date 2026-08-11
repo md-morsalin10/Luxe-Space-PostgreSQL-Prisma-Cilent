@@ -1,6 +1,5 @@
-import React from 'react';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+
+import { getSessionOnServer } from '@/lib/auth-server';
 import BuyerProfileClient from './BuyerProfileClient';
 
 
@@ -13,9 +12,7 @@ interface AuthUser {
 }
 
 const MyProfile = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const session = await getSessionOnServer()
 
     const user = session?.user as AuthUser | undefined;
 

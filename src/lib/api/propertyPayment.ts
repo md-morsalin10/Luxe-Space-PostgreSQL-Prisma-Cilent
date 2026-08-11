@@ -1,9 +1,10 @@
 import { serverFetch } from "../core/server-api";
+import type { Booking } from "@/types/property";
 
-export const getPaymentDataById = async (userId: string) => {
-    return serverFetch(`/api/payment?userId=${userId}`);
-}
+export const getPaymentDataByBuyerId = async (buyerId: string): Promise<Booking[]> => {
+    return serverFetch<Booking[]>(`/api/payment/buyerId?buyerId=${buyerId}`);
+};
 
-// export const getPaymentDataSellerId = async (sellerId: string) => {
-//     return serverFetch(`/api/payment?sellerId=${sellerId}`);
-// }
+export const getPaymentDataBySellerId = async (sellerId: string): Promise<Booking[]> => {
+    return serverFetch<Booking[]>(`/api/payment/sellerId?sellerId=${sellerId}`);
+};

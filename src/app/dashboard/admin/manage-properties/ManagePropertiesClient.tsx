@@ -5,7 +5,7 @@ import { BiBuildingHouse, BiMap, BiBed, BiBath, BiArea, BiTrash, BiSearch, BiFil
 import gsap from 'gsap';
 
 interface Property {
-    _id: string;
+    id: string;
     title: string;
     type: string;
     price: number;
@@ -43,7 +43,7 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
 
     const handleDeleteProperty = (id: string) => {
         if (confirm("Are you sure you want to remove this property listing?")) {
-            setProperties(prev => prev.filter(p => p._id !== id));
+            setProperties(prev => prev.filter(p => p.id !== id));
         }
     };
 
@@ -132,7 +132,7 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                                     </tr>
                                 ) : (
                                     filteredProperties.map((property) => (
-                                        <tr key={property._id} className="property-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
+                                        <tr key={property.id} className="property-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
                                             {/* ইমেজ ও টাইটেল */}
                                             <td className="py-4 px-6 max-w-sm">
                                                 <div className="flex items-center gap-4">
@@ -193,11 +193,10 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                                                 )}
                                             </td>
 
-                                            {/* অ্যাকশন বাটন */}
                                             <td className="py-4 px-6 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <button 
-                                                        onClick={() => handleDeleteProperty(property._id)}
+                                                        onClick={() => handleDeleteProperty(property.id)}
                                                         className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors border border-transparent hover:border-rose-100"
                                                         title="Delete Property"
                                                     >

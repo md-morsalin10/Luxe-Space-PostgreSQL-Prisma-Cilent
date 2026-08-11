@@ -4,20 +4,28 @@ import Link from 'next/link';
 import React from 'react';
 import PropertyCard, { Property } from './PropertyCard';
 import { MotionDiv } from './MotionWrapper';
-
-interface RawPropertyData extends Omit<Property, '_id'> {
-  _id: string | { $oid: string };
-}
+import type { Property as ApiProperty } from '@/types/property';
 
 const FeaturesSection = async () => {
-  const featuresData = (await getFeaturesProperty()) as RawPropertyData[];
+  const featuresData: ApiProperty[] = await getFeaturesProperty().catch((): ApiProperty[] => []);
 
+  // Map from the canonical API Property shape to PropertyCard's Property shape.
+  // The API uses `id` (Prisma UUID string), not MongoDB's `_id`.
   const formattedProperties: Property[] = (featuresData || []).map((item) => ({
-    ...item,
-    _id: item._id && typeof item._id === 'object' && '$oid' in item._id ? item._id.$oid : String(item._id),
+    id:          item.id,
+    title:       item.title,
+    type:        item.type,
+    price:       item.price,
+    location:    item.location,
+    bedrooms:    item.bedrooms,
+    bathrooms:   item.bathrooms,
+    area:        item.area,
+    image:       item.image       || '',
+    status:      item.status,
+    description: item.description || undefined,
+    sellerId:    item.sellerId,
   }));
 
-  
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -28,19 +36,18 @@ const FeaturesSection = async () => {
 
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 0.6, ease: [0.215, 0.610, 0.355, 1.000] } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.215, 0.610, 0.355, 1.000] }
     }
   };
 
   return (
     <section className="py-20 bg-[#F8FAFC] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        {/* সেকশন হেডার অ্যানিমেশন */}
-        <MotionDiv 
+
+        <MotionDiv
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -59,14 +66,13 @@ const FeaturesSection = async () => {
           </p>
         </MotionDiv>
 
-        {/* গ্রিড লেআউট উইথ স্ট্যাগার অ্যানিমেশন */}
         {formattedProperties.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm font-light">
             No featured properties found at the moment.
           </div>
         ) : (
           <>
-            <MotionDiv 
+            <MotionDiv
               variants={containerVariants}
               initial="hidden"
               whileInView="visible"
@@ -74,22 +80,21 @@ const FeaturesSection = async () => {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
             >
               {formattedProperties.map((property) => (
-                <MotionDiv key={property._id} variants={itemVariants}>
+                <MotionDiv key={property.id} variants={itemVariants}>
                   <PropertyCard property={property} />
                 </MotionDiv>
               ))}
             </MotionDiv>
 
-            {/* ভিউ অল বাটন অ্যানিমেশন */}
-            <MotionDiv 
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="text-center mt-16"
             >
-              <Link 
-                href="/properties" 
+              <Link
+                href="/properties"
                 className="inline-block border border-[#C9A227] text-[#C9A227] hover:bg-[#C9A227] hover:text-white font-medium text-xs tracking-widest uppercase px-8 py-4 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300"
               >
                 View All Properties

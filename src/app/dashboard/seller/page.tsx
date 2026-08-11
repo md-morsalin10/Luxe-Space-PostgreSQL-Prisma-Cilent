@@ -1,54 +1,52 @@
 import { getPropertyBySellerId } from '@/lib/api/property';
-
+import { getPaymentDataBySellerId } from '@/lib/api/propertyPayment';
 import SellerDashboardClient from './SellerDashboardClient';
 import { getSessionOnServer } from '@/lib/auth-server';
-
-interface AuthUser {
-    id: string;
-    email: string;
-    name: string;
-    image?: string | null;
-    role?: "buyer" | "seller" | "admin";
-}
+import type { AuthUser, SoldProperty, AllProperty } from '@/types/property';
 
 const SellerDashboard = async () => {
-    const session = await getSessionOnServer()
+    const session = await getSessionOnServer();
     if (!session) {
-        return null
+        return null;
     }
 
-    const seller = session?.user as AuthUser | undefined;
+    const seller   = session?.user as AuthUser | undefined;
     const sellerId = seller?.id as string;
 
-    // অবজেক্ট আকারে { sellerId } পাস করে প্যারালালি ডেটা ফেচিং করা হলো
-    const [soldPropertiesData, allPropertiesData] = await Promise.all([
-        // getPaymentDataSellerId(sellerId) || [],
-        // getPropertyBySellerId({ sellerId }) || []
-        [],
-        []
+    // Fetch sold bookings and all listed properties in parallel
+    const [soldData, allPropertiesData] = await Promise.all([
+        getPaymentDataBySellerId(sellerId).catch((err) => {
+            console.error("[seller/page.tsx] Failed to fetch sold properties:", err);
+            return [];
+        }),
+        getPropertyBySellerId({ sellerId }).catch((err) => {
+            console.error("[seller/page.tsx] Failed to fetch all properties:", err);
+            return [];
+        }),
     ]);
-    // সোল্ড প্রোপার্টি বা পেমেন্ট ডাটা ফরম্যাটিং
-    const formattedSold = soldPropertiesData.map((s: any) => ({
-        _id: typeof s._id === 'object' && s._id && '$oid' in s._id ? s._id.$oid : String(s._id || ''),
-        title: s.title || '',
-        price: Number(s.price || 0),
-        type: s.type || 'apartment',
-        location: s.location || '',
-        image: s.image || '',
-        buyerName: s.buyer?.name || 'Client',
-        buyerEmail: s.buyer?.email || '',
-        createdAt: typeof s.createdAt === 'object' && s.createdAt && '$date' in s.createdAt ? s.createdAt.$date : String(s.createdAt || '')
+
+    // Map Booking records to SoldProperty shape for SellerDashboardClient
+    const formattedSold: SoldProperty[] = soldData.map((s) => ({
+        id:         s.id,
+        title:      s.title,
+        price:      Number(s.price || 0),
+        type:       s.type || 'apartment',
+        location:   s.location || '',
+        image:      s.image || null,
+        buyerName:  s.buyerName || 'Client',
+        buyerEmail: s.buyerEmail || '',
+        createdAt:  s.createdAt || '',
     }));
 
-    // সেলারের সব প্রোপার্টি ডাটা ফরম্যাটিং
-    const formattedAll = allPropertiesData.map((p: any) => ({
-        _id: typeof p._id === 'object' && p._id && '$oid' in p._id ? p._id.$oid : String(p._id || ''),
-        title: p.title || '',
-        type: p.type || 'apartment',
-        price: Number(p.price || 0),
+    // Map Property records to AllProperty shape for SellerDashboardClient
+    const formattedAll: AllProperty[] = allPropertiesData.map((p) => ({
+        id:       p.id,
+        title:    p.title || '',
+        type:     p.type || 'apartment',
+        price:    Number(p.price || 0),
         location: p.location || '',
-        status: p.status || 'available',
-        image: p.image || ''
+        status:   p.status || 'available',
+        image:    p.image || null,
     }));
 
     return (

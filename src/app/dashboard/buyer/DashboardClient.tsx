@@ -1,61 +1,51 @@
 "use client";
 
 import React, { useEffect, useRef } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import {
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+    ResponsiveContainer, PieChart, Pie, Cell, Legend,
+} from 'recharts';
 import { BiBuildingHouse, BiDollarCircle, BiTrendingUp, BiWallet } from 'react-icons/bi';
 import gsap from 'gsap';
-
-interface PaymentProperty {
-    id: string;
-    sessionId: string;
-    propertyId: string;
-    title: string;
-    price: number;
-    type: string;
-    location: string;
-    image: string;
-    seller: { id: string; name: string; email: string };
-    createdAt: string;
-}
+import type { AuthUser, PaymentProperty } from '@/types/property';
 
 interface DashboardClientProps {
-    user: any;
+    user: AuthUser | undefined;
     properties: PaymentProperty[];
 }
 
 const DashboardClient = ({ user, properties }: DashboardClientProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-
     const totalSpent = properties.reduce((acc, curr) => acc + curr.price, 0);
     const totalProperties = properties.length;
-    
 
-    const typeDataMap = properties.reduce((acc: any, curr) => {
+    const typeDataMap = properties.reduce((acc: Record<string, number>, curr) => {
         acc[curr.type] = (acc[curr.type] || 0) + curr.price;
         return acc;
     }, {});
-    
+
     const pieChartData = Object.keys(typeDataMap).map(type => ({
         name: type.toUpperCase(),
-        value: typeDataMap[type]
+        value: typeDataMap[type],
     }));
 
-    const trendData = properties.map(p => ({
-        date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        amount: p.price
-    })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
+    const trendData = [...properties]
+        .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+        .map(p => ({
+            date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            amount: p.price,
+        }));
 
     const COLORS = ['#C9A227', '#0F172A', '#10B981', '#6366F1'];
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.fromTo(".stat-card", 
+            gsap.fromTo(".stat-card",
                 { opacity: 0, y: 30 },
                 { opacity: 1, y: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }
             );
-            gsap.fromTo(".chart-card", 
+            gsap.fromTo(".chart-card",
                 { opacity: 0, scale: 0.98 },
                 { opacity: 1, scale: 1, duration: 0.6, delay: 0.3, ease: "power3.out" }
             );
@@ -66,7 +56,7 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
     return (
         <div ref={containerRef} className="min-h-screen bg-[#F9FAFB] text-slate-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                
+
                 <div className="mb-10 border-b border-slate-200 pb-6">
                     <span className="text-[11px] font-bold text-[#C9A227] tracking-[0.2em] uppercase">Investor Portal</span>
                     <h1 className="text-3xl font-serif font-bold tracking-tight text-slate-900 mt-1">
@@ -77,7 +67,6 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                     </p>
                 </div>
 
-     
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div className="stat-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
                         <div>
@@ -113,8 +102,7 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    
-              
+
                     <div className="chart-card opacity-0 lg:col-span-2 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
                         <div className="flex items-center justify-between mb-6">
                             <div>
@@ -131,16 +119,16 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                                     <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#C9A227" stopOpacity={0.2}/>
-                                                <stop offset="95%" stopColor="#C9A227" stopOpacity={0}/>
+                                                <stop offset="5%" stopColor="#C9A227" stopOpacity={0.2} />
+                                                <stop offset="95%" stopColor="#C9A227" stopOpacity={0} />
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
                                         <XAxis dataKey="date" stroke="#94A3B8" />
                                         <YAxis stroke="#94A3B8" />
-                                        <Tooltip 
+                                        <Tooltip
                                             contentStyle={{ backgroundColor: '#0F172A', borderRadius: '12px', color: '#fff', border: 'none' }}
-                                            formatter={(value: any) => [`$${value.toLocaleString()}`, 'Amount Paid']}
+                                            formatter={(value: any) => [`$${Number(value || 0).toLocaleString()}`, 'Amount Paid']}
                                         />
                                         <Area type="monotone" dataKey="amount" stroke="#C9A227" strokeWidth={2} fillOpacity={1} fill="url(#colorAmount)" />
                                     </AreaChart>
@@ -173,7 +161,7 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                             ))}
                                         </Pie>
-                                        <Tooltip formatter={(value: any) => `$${value.toLocaleString()}`} />
+                                        <Tooltip formatter={(value: any) => `$${Number(value || 0).toLocaleString()}`} />
                                         <Legend verticalAlign="bottom" iconType="circle" />
                                     </PieChart>
                                 </ResponsiveContainer>

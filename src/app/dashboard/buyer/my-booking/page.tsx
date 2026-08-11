@@ -1,8 +1,7 @@
-import { getPaymentDataById } from '@/lib/api/propertyPayment';
-import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
-import React from 'react';
 import BookingListClient from './BookingListClient';
+import { getSessionOnServer } from '@/lib/auth-server';
+import { getPaymentDataByBuyerId } from '@/lib/api/propertyPayment';
 
 interface AuthUser {
     id: string;
@@ -12,9 +11,9 @@ interface AuthUser {
     role?: "buyer" | "seller" | "admin";
 }
 
-// টাইপ ফিক্স করার জন্য প্রপ্স ইন্টারফেস যা ক্লায়েন্ট কম্পোনেন্টের সাথে মিলবে
-interface PaymentProperty {
-    _id: string;
+export interface PaymentProperty {
+    id: string;
+    _id?: string;
     sessionId: string;
     propertyId: string;
     title: string;
@@ -22,25 +21,27 @@ interface PaymentProperty {
     type: string;
     location: string;
     image: string;
-    seller: {
-        id: string;
-        name: string;
-        email: string;
-    };
+    sellerId?: string;
+    sellerEmail?: string;
+    sellerName?: string;
     createdAt: string;
 }
 
 const MyBookings = async () => {
-    const headersList = await headers();
-    const session = await auth.api.getSession({
-        headers: headersList
-    });
+    const session = await getSessionOnServer();
     const user = session?.user as AuthUser | undefined;
-    
-    const bookedProperties = await getPaymentDataById(user?.id as string) || [];
 
-    // 'as unknown as PaymentProperty[]' দিয়ে টাইপ ফিক্স করা হলো
-    return <BookingListClient properties={bookedProperties as unknown as PaymentProperty[]} />;
+    if (!user?.id) {
+        return <BookingListClient properties={[]} />;
+    }
+
+    const bookedProperties = (await getPaymentDataByBuyerId(user.id)) || [];
+
+    return (
+        <BookingListClient
+            properties={bookedProperties as unknown as PaymentProperty[]}
+        />
+    );
 };
 
 export default MyBookings;

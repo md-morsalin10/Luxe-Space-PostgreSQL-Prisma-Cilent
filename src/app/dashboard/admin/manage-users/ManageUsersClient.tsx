@@ -5,7 +5,7 @@ import { BiUserCheck, BiShieldQuarter, BiTrash, BiSearch, BiFilterAlt } from 're
 import gsap from 'gsap';
 // ManageUsersClient.tsx ফাইলের ভেতরের ইন্টারফেসটি এমন রাখুন:
 interface User {
-    _id: string;
+    id: string;
     name: string;
     email: string;
     emailVerified: boolean;
@@ -32,12 +32,12 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
 
     // রোল চেঞ্জ বা ডিলিট করার ডামি হ্যান্ডলার (আপনার ব্যাকএন্ড এপিআই কানেক্ট করে নিবেন)
     const handleRoleChange = (userId: string, newRole: "buyer" | "seller" | "admin") => {
-        setUsers(prev => prev.map(u => u._id === userId ? { ...u, role: newRole } : u));
+        setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
     };
 
     const handleDeleteUser = (userId: string) => {
         if(confirm("Are you sure you want to suspend this user?")) {
-            setUsers(prev => prev.filter(u => u._id !== userId));
+            setUsers(prev => prev.filter(u => u.id !== userId));
         }
     };
 
@@ -122,7 +122,7 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
                                     </tr>
                                 ) : (
                                     filteredUsers.map((user) => (
-                                        <tr key={user._id} className="user-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
+                                        <tr key={user.id} className="user-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
                                             {/* ইউজার ইনফো */}
                                             <td className="py-4 px-6 flex items-center gap-3">
                                                 <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
@@ -182,7 +182,7 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
                                                     {/* কুইক রোল চেঞ্জ ড্রপডাউন */}
                                                     <select
                                                         value={user.role}
-                                                        onChange={(e) => handleRoleChange(user._id, e.target.value as any)}
+                                                        onChange={(e) => handleRoleChange(user.id, e.target.value as any)}
                                                         className="py-1 px-2 text-[11px] bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-slate-400 text-slate-600 font-medium"
                                                     >
                                                         <option value="buyer">Buyer</option>
@@ -192,7 +192,7 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
 
                                                     {/* সাসপেন্ড/ডিলিট বাটন */}
                                                     <button 
-                                                        onClick={() => handleDeleteUser(user._id)}
+                                                        onClick={() => handleDeleteUser(user.id)}
                                                         className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
                                                         title="Suspend Account"
                                                     >

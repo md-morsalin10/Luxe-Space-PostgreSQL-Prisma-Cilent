@@ -4,35 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { Person, Envelope } from '@gravity-ui/icons';
 import { BiBed, BiBath, BiArea, BiMap, BiCalendar, BiDollarCircle } from 'react-icons/bi';
 import gsap from 'gsap';
-
-// 🟢 ১. Type Definition ঠিক করা হলো (seller nested object সহ)
-interface Seller {
-    id: string;
-    name: string;
-    email: string;
-    image?: string;
-}
-
-interface Property {
-    id?: string;
-    _id?: string;
-    title: string;
-    type: string;
-    price: number;
-    location: string;
-    bedrooms: number;
-    bathrooms: number;
-    area: number;
-    description: string;
-    image: string;
-    status: string;
-    dateUploaded?: string;
-    createdAt?: string;
-    sellerId: string;
-    seller?: Seller; // 👈 nested seller Object
-    sellerName?: string;
-    sellerEmail?: string;
-}
+import type { Property } from '@/types/property';
 
 interface PropertyDetailsClientProps {
     property: Property;
@@ -44,27 +16,27 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
     const detailsRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
-
-    const propertyId = property.id || property._id || "";
-    const sellerName = property.seller?.name || property.sellerName || "Property Owner";
-    const sellerEmail = property.seller?.email || property.sellerEmail || "";
-    const sellerId = property.sellerId || property.seller?.id || "";
+    const sellerName  = property.seller?.name  || "Property Owner";
+    const sellerEmail = property.seller?.email || "";
+    const sellerId    = property.sellerId || property.seller?.id || "";
 
     useEffect(() => {
         const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.8 } });
 
-        tl.fromTo(headerRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0 })
-            .fromTo(imageRef.current, { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1 }, "-=0.5")
-            .fromTo(detailsRef.current, { opacity: 0, x: -30 }, { opacity: 1, x: 0 }, "-=0.4")
-            .fromTo(sidebarRef.current, { opacity: 0, x: 30 }, { opacity: 1, x: 0 }, "-=0.8");
+        tl.fromTo(headerRef.current,  { opacity: 0, y: -20 }, { opacity: 1, y: 0 })
+          .fromTo(imageRef.current,   { opacity: 0, scale: 0.95 }, { opacity: 1, scale: 1 }, "-=0.5")
+          .fromTo(detailsRef.current, { opacity: 0, x: -30 }, { opacity: 1, x: 0 }, "-=0.4")
+          .fromTo(sidebarRef.current, { opacity: 0, x: 30 },  { opacity: 1, x: 0 }, "-=0.8");
     }, []);
 
-    const uploadDate = property.dateUploaded || property.createdAt || new Date();
+    const uploadDate    = property.dateUploaded || property.createdAt || new Date().toISOString();
     const formattedDate = new Date(uploadDate).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
-        day: 'numeric'
+        day: 'numeric',
     });
+
+    const imageUrl = property.image || '';
 
     return (
         <div className="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8">
@@ -93,7 +65,7 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                 {/* Main Hero Image */}
                 <div ref={imageRef} className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden bg-gray-100 border border-gray-150 mb-10 shadow-md">
                     <img
-                        src={property.image}
+                        src={imageUrl}
                         alt={property.title}
                         className="object-cover w-full h-full"
                     />
@@ -140,7 +112,7 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                                 Description
                             </h3>
                             <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
-                                {property.description}
+                                {property.description ?? "No description available."}
                             </p>
                         </div>
                     </div>
@@ -187,25 +159,32 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                                     Contact Seller
                                 </a>
 
-                                {/* 🟢 ৩. সঠিকভাবে ফর্মের Hidden inputs দেওয়া হলো */}
+                                {/*
+                                  Hidden form inputs:
+                                  - propertyId, title, price, type, location, image → property metadata for Stripe line items
+                                  - sellerId, sellerEmail, sellerName → stored in the Booking record
+                                  - buyerId is intentionally NOT included here; the Next.js /api/payment route
+                                    reads it from the server-side session (getSessionOnServer) for security.
+                                */}
                                 <form action="/api/payment" method="POST">
-                                    <input type="hidden" name="propertyId" value={propertyId} />
-                                    <input type="hidden" name="title" value={property.title} />
-                                    <input type="hidden" name="price" value={property.price} />
-                                    <input type="hidden" name="type" value={property.type} />
-                                    <input type="hidden" name="location" value={property.location} />
-                                    <input type="hidden" name="image" value={property.image} />
-                                    <input type="hidden" name="sellerId" value={sellerId} />
-                                    <input type="hidden" name="sellerEmail" value={sellerEmail} />
-                                    <input type="hidden" name="sellerName" value={sellerName} />
+                                    <input type="hidden" name="propertyId"   value={property.id} />
+                                    <input type="hidden" name="title"        value={property.title} />
+                                    <input type="hidden" name="price"        value={property.price} />
+                                    <input type="hidden" name="type"         value={property.type} />
+                                    <input type="hidden" name="location"     value={property.location} />
+                                    <input type="hidden" name="image"        value={imageUrl} />
+                                    <input type="hidden" name="sellerId"     value={sellerId} />
+                                    <input type="hidden" name="sellerEmail"  value={sellerEmail} />
+                                    <input type="hidden" name="sellerName"   value={sellerName} />
 
                                     <button
                                         type="submit"
                                         disabled={property.status === "sold"}
-                                        className={`w-full text-xs font-semibold uppercase tracking-wider py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 border ${property.status === "sold"
+                                        className={`w-full text-xs font-semibold uppercase tracking-wider py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 border ${
+                                            property.status === "sold"
                                                 ? "bg-gray-200 text-gray-400 border-gray-200 cursor-not-allowed"
                                                 : "bg-[#C9A227] text-[#0f172a] hover:bg-[#e5ba73] border-[#C9A227]"
-                                            }`}
+                                        }`}
                                     >
                                         <BiDollarCircle className="w-4 h-4" />
                                         {property.status === "sold" ? "Sold" : "Book Now"}
