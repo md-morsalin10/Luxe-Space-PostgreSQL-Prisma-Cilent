@@ -1,6 +1,6 @@
 "use client";
 
-export interface PropertyOwner {
+export interface PropertySeller {
     id: string;
     name: string;
     email: string;
@@ -20,8 +20,8 @@ export interface Property {
     image?: string | null;
     status: string;
     dateUploaded: string;
-    ownerId: string;
-    owner?: PropertyOwner;
+    sellerId: string;           // 👈 Prisma schema অনুযায়ী sellerId
+    seller?: PropertySeller;     // 👈 Prisma schema অনুযায়ী seller
     buyerId?: string | null;
     createdAt: string;
     updatedAt: string;
@@ -42,7 +42,10 @@ export const clientMutation = async (path: string, data: any) => {
     });
 
     if (!response.ok) {
-        throw new Error(`Mutation failed on ${path}`);
+       
+        const errorData = await response.json().catch(() => null);
+        console.error("Backend Response Error:", errorData);
+        throw new Error(errorData?.message || `Mutation failed on ${path}`);
     }
 
     return await response.json();

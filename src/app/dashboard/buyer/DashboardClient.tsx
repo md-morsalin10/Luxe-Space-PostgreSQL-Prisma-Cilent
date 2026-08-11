@@ -6,7 +6,7 @@ import { BiBuildingHouse, BiDollarCircle, BiTrendingUp, BiWallet } from 'react-i
 import gsap from 'gsap';
 
 interface PaymentProperty {
-    _id: string;
+    id: string;
     sessionId: string;
     propertyId: string;
     title: string;
@@ -26,11 +26,11 @@ interface DashboardClientProps {
 const DashboardClient = ({ user, properties }: DashboardClientProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // ১. স্ট্যাটিস্টিকস ক্যালকুলেশন
+
     const totalSpent = properties.reduce((acc, curr) => acc + curr.price, 0);
     const totalProperties = properties.length;
     
-    // ২. চার্ট ১ এর জন্য ডেটা প্রিপারেশন (টাইপ ভিত্তিক ইনভেস্টমেন্ট ডিস্ট্রিবিউশন)
+
     const typeDataMap = properties.reduce((acc: any, curr) => {
         acc[curr.type] = (acc[curr.type] || 0) + curr.price;
         return acc;
@@ -41,13 +41,12 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
         value: typeDataMap[type]
     }));
 
-    // ৩. চার্ট ২ এর জন্য ডেটা প্রিপারেশন (সময় ভিত্তিক ইনভেস্টমেন্ট ট্রেন্ড)
     const trendData = properties.map(p => ({
         date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         amount: p.price
     })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // ৪. প্রিমিয়াম কালার প্যালেট (লাক্সারি গোল্ড, স্লেট, এমারেল্ড)
+
     const COLORS = ['#C9A227', '#0F172A', '#10B981', '#6366F1'];
 
     useEffect(() => {
@@ -68,7 +67,6 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
         <div ref={containerRef} className="min-h-screen bg-[#F9FAFB] text-slate-950 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 
-                {/* হেডার ও ওয়েলকাম মেসেজ */}
                 <div className="mb-10 border-b border-slate-200 pb-6">
                     <span className="text-[11px] font-bold text-[#C9A227] tracking-[0.2em] uppercase">Investor Portal</span>
                     <h1 className="text-3xl font-serif font-bold tracking-tight text-slate-900 mt-1">
@@ -79,9 +77,8 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                     </p>
                 </div>
 
-                {/* স্ট্যাট কার্ডস গ্রিড */}
+     
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                    {/* কার্ড ১: মোট ইনভেস্টমেন্ট */}
                     <div className="stat-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
                         <div>
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Capital Deployed</span>
@@ -92,7 +89,6 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                         </div>
                     </div>
 
-                    {/* কার্ড ২: প্রোপার্টি সংখ্যা */}
                     <div className="stat-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
                         <div>
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Assets Owned</span>
@@ -103,7 +99,6 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                         </div>
                     </div>
 
-                    {/* কার্ড ৩: গড় এভারেজ ভ্যালু */}
                     <div className="stat-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
                         <div>
                             <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Average Asset Value</span>
@@ -117,10 +112,9 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                     </div>
                 </div>
 
-                {/* চার্ট সেকশন গ্রিড */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    {/* বামের বড় চার্ট: ইনভেস্টমেন্ট টাইমলাইন ট্রেন্ড (AreaChart) */}
+              
                     <div className="chart-card opacity-0 lg:col-span-2 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
                         <div className="flex items-center justify-between mb-6">
                             <div>
@@ -129,7 +123,7 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                             </div>
                             <BiWallet className="text-slate-400 w-5 h-5" />
                         </div>
-                        <div className="w-full h-[320px] text-xs">
+                        <div className="w-full h-80 text-xs">
                             {trendData.length === 0 ? (
                                 <div className="h-full flex items-center justify-center text-slate-400">No transaction records available.</div>
                             ) : (
@@ -155,7 +149,6 @@ const DashboardClient = ({ user, properties }: DashboardClientProps) => {
                         </div>
                     </div>
 
-                    {/* ডানের চার্ট: ক্যাটাগরি বা টাইপ ভিত্তিক বন্টন (PieChart) */}
                     <div className="chart-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between">
                         <div>
                             <h3 className="text-sm font-bold text-slate-900">Portfolio Diversity</h3>

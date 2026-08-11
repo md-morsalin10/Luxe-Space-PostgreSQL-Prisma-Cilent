@@ -6,7 +6,6 @@ import { authClient } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 import { createProperty } from "@/lib/action/property";
 
-
 export default function AddProperty() {
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
@@ -24,6 +23,12 @@ export default function AddProperty() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!user?.id) {
+      toast.error("User not authenticated or session not loaded yet!");
+      return;
+    }
+
     setLoading(true);
 
     const form = e.currentTarget;
@@ -66,6 +71,7 @@ export default function AddProperty() {
       if (imgBbResult.success) {
         const imageUrl = imgBbResult.data.display_url;
 
+        // 🟢 ২. ownerId বদলে sellerId ব্যবহার করা হয়েছে
         const propertyData = {
           title,
           type,
@@ -78,10 +84,9 @@ export default function AddProperty() {
           image: imageUrl,
           status: "available",
           dateUploaded: new Date().toISOString(),
-          ownerId: user?.id,
+          sellerId: user.id,
         };
 
-     
         const result = await createProperty(propertyData);
 
         if (result) {
@@ -101,7 +106,6 @@ export default function AddProperty() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-white text-[#0f172a] flex items-center justify-center p-4">
@@ -225,10 +229,9 @@ export default function AddProperty() {
           </div>
 
           {/* Submit Button */}
-          {/* Submit Button */}
           <Button
             type="submit"
-            isDisabled={loading} // এখানে 'disabled' এর বদলে 'isDisabled' হবে
+            isDisabled={loading}
             className="w-full mt-2 bg-[#0f172a] hover:bg-[#1e293b] text-white font-bold py-3 rounded-lg shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5 duration-200"
           >
             {loading ? "Uploading to LuxeSpace..." : "Publish Property"}

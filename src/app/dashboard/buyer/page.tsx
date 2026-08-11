@@ -1,9 +1,6 @@
-import { getPaymentDataById } from '@/lib/api/propertyPayment';
-
-import { headers } from 'next/headers';
-import React from 'react';
 import DashboardClient from './DashboardClient';
-import { useSession } from '@/lib/auth-client';
+import { getSessionOnServer } from '@/lib/auth-server';
+
 
 
 interface AuthUser {
@@ -22,7 +19,7 @@ interface PaymentProperty {
     price: number;
     type: string;
     location: string;
-    image: string;
+    image?: string;
     seller: {
         id: string;
         name: string;
@@ -32,12 +29,11 @@ interface PaymentProperty {
 }
 
 const UserDashboard = async () => {
-    const headersList = await headers();
-    const session = await useSession();
+    const session = await getSessionOnServer()
     const user = session?.user as AuthUser | undefined;
 
-    // ডাটা সার্ভার সাইড থেকে ফেচ করা হচ্ছে
-    const bookedProperties = await getPaymentDataById(user?.id as string) || [];
+    // const bookedProperties = await getPaymentDataById(user?.id as string) || [];
+    const bookedProperties =  [];
 
     return (
         <DashboardClient 

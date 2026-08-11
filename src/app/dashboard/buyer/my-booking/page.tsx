@@ -37,7 +37,6 @@ const MyBookings = async () => {
     });
     const user = session?.user as AuthUser | undefined;
     
-    // ডাটা নিয়ে আসা হচ্ছে
     const bookedProperties = await getPaymentDataById(user?.id as string) || [];
 
     // 'as unknown as PaymentProperty[]' দিয়ে টাইপ ফিক্স করা হলো

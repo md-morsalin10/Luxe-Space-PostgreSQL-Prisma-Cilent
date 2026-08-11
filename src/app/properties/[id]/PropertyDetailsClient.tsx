@@ -5,8 +5,17 @@ import { Person, Envelope } from '@gravity-ui/icons';
 import { BiBed, BiBath, BiArea, BiMap, BiCalendar, BiDollarCircle } from 'react-icons/bi';
 import gsap from 'gsap';
 
+// 🟢 ১. Type Definition ঠিক করা হলো (seller nested object সহ)
+interface Seller {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+}
+
 interface Property {
-    _id: string;
+    id?: string;
+    _id?: string;
     title: string;
     type: string;
     price: number;
@@ -17,10 +26,12 @@ interface Property {
     description: string;
     image: string;
     status: string;
-    dateUploaded: string;
+    dateUploaded?: string;
+    createdAt?: string;
     sellerId: string;
-    sellerName: string;
-    sellerEmail: string;
+    seller?: Seller; // 👈 nested seller Object
+    sellerName?: string;
+    sellerEmail?: string;
 }
 
 interface PropertyDetailsClientProps {
@@ -33,6 +44,12 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
     const detailsRef = useRef<HTMLDivElement>(null);
     const sidebarRef = useRef<HTMLDivElement>(null);
 
+
+    const propertyId = property.id || property._id || "";
+    const sellerName = property.seller?.name || property.sellerName || "Property Owner";
+    const sellerEmail = property.seller?.email || property.sellerEmail || "";
+    const sellerId = property.sellerId || property.seller?.id || "";
+
     useEffect(() => {
         const tl = gsap.timeline({ defaults: { ease: "power3.out", duration: 0.8 } });
 
@@ -42,7 +59,8 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
             .fromTo(sidebarRef.current, { opacity: 0, x: 30 }, { opacity: 1, x: 0 }, "-=0.8");
     }, []);
 
-    const formattedDate = new Date(property.dateUploaded).toLocaleDateString('en-US', {
+    const uploadDate = property.dateUploaded || property.createdAt || new Date();
+    const formattedDate = new Date(uploadDate).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
@@ -67,7 +85,7 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                         </div>
                         <div className="text-left md:text-right">
                             <span className="text-xs font-bold text-[#C9A227] tracking-widest uppercase block mb-1">Price</span>
-                            <span className="text-3xl font-bold text-[#0f172a]">${property.price.toLocaleString()}</span>
+                            <span className="text-3xl font-bold text-[#0f172a]">${property.price?.toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
@@ -135,11 +153,15 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                             </h3>
 
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="w-14 h-14 rounded-full bg-[#C9A227]/10 border border-[#C9A227]/20 flex items-center justify-center text-[#C9A227]">
-                                    <Person className="w-6 h-6" />
+                                <div className="w-14 h-14 rounded-full bg-[#C9A227]/10 border border-[#C9A227]/20 flex items-center justify-center text-[#C9A227] overflow-hidden">
+                                    {property.seller?.image ? (
+                                        <img src={property.seller.image} alt={sellerName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        <Person className="w-6 h-6" />
+                                    )}
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-bold text-[#0f172a]">{property.sellerName}</h4>
+                                    <h4 className="text-sm font-bold text-[#0f172a]">{sellerName}</h4>
                                     <p className="text-xs text-gray-400 mt-0.5">Professional Agency Partner</p>
                                 </div>
                             </div>
@@ -147,7 +169,7 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                             <div className="space-y-4 mb-6">
                                 <div className="flex items-center gap-3 text-xs text-gray-600 bg-gray-50/50 border border-gray-100 rounded-xl px-3.5 py-2.5">
                                     <Envelope className="w-4 h-4 text-gray-400 shrink-0" />
-                                    <span className="truncate">{property.sellerEmail}</span>
+                                    <span className="truncate">{sellerEmail || "No email available"}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-xs text-gray-600 bg-gray-50/50 border border-gray-100 rounded-xl px-3.5 py-2.5">
                                     <BiCalendar className="w-4 h-4 text-gray-400 shrink-0" />
@@ -158,22 +180,24 @@ const PropertyDetailsClient: React.FC<PropertyDetailsClientProps> = ({ property 
                             {/* CTA Action Buttons */}
                             <div className="space-y-3">
                                 <a
-                                    href={`mailto:${property.sellerEmail}?subject=Inquiry about ${property.title}`}
+                                    href={`mailto:${sellerEmail}?subject=Inquiry about ${property.title}`}
                                     className="w-full bg-[#0f172a] text-white hover:bg-[#1e293b] text-xs font-semibold uppercase tracking-wider py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 border border-[#0f172a]"
                                 >
                                     <Envelope className="w-4 h-4" />
                                     Contact Seller
                                 </a>
+
+                                {/* 🟢 ৩. সঠিকভাবে ফর্মের Hidden inputs দেওয়া হলো */}
                                 <form action="/api/payment" method="POST">
-                                    <input type="hidden" name="propertyId" value={property._id} />
+                                    <input type="hidden" name="propertyId" value={propertyId} />
                                     <input type="hidden" name="title" value={property.title} />
                                     <input type="hidden" name="price" value={property.price} />
                                     <input type="hidden" name="type" value={property.type} />
                                     <input type="hidden" name="location" value={property.location} />
                                     <input type="hidden" name="image" value={property.image} />
-                                    <input type="hidden" name="sellerId" value={property.sellerId} />
-                                    <input type="hidden" name="sellerEmail" value={property.sellerEmail} />
-                                    <input type="hidden" name="sellerName" value={property.sellerName} />
+                                    <input type="hidden" name="sellerId" value={sellerId} />
+                                    <input type="hidden" name="sellerEmail" value={sellerEmail} />
+                                    <input type="hidden" name="sellerName" value={sellerName} />
 
                                     <button
                                         type="submit"

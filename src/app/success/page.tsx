@@ -1,8 +1,9 @@
 import { stripe } from '@/lib/stripe';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { auth } from '@/lib/auth';
+
 import { headers } from 'next/headers';
+import { getSessionOnServer } from '@/lib/auth-server';
 
 interface SearchParams {
   session_id?: string;
@@ -15,10 +16,10 @@ interface AuthUser {
   role?: "buyer" | "seller" | "admin";
 }
 
-// ব্যাকএন্ডে ডেটা পাঠানোর ফাংশন
+
 async function createBookPayment(paymentData: any) {
   try {
-   
+   console.log("Sending Payment Data:", paymentData);
     const baseUrl = process.env.NEXT_PUBLIC_URL
 
     const response = await fetch(`${baseUrl}/api/payment`, {
@@ -50,12 +51,9 @@ export default async function Success({
   }
 
   const headersList = await headers();
-  const session = await auth.api.getSession({
-    headers: headersList,
-  });
+  const session = await getSessionOnServer()
   const user = session?.user as AuthUser | undefined;
 
-  // স্ট্রাইপ সেশন রিট্রিভ
   const checkoutSession = await stripe.checkout.sessions.retrieve(session_id);
 
   const status = checkoutSession.status;
@@ -67,7 +65,6 @@ export default async function Success({
   }
 
   if (status === 'complete' && metadata) {
-    // 🎯 ফিক্স: ডাটাবেজে পাঠানোর আগে নিশ্চিত হয়ে নেওয়া যে কোনো ফিল্ড undefined যাচ্ছে না
     await createBookPayment({
       sessionId: session_id,
       propertyId: metadata.propertyId || "",

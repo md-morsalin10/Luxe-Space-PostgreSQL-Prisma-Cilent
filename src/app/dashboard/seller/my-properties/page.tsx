@@ -1,6 +1,6 @@
 import PropertyActions from '@/components/Dashboard/PropertyActions';
 import { getPropertyBySellerId } from '@/lib/api/property';
-import { auth } from '@/lib/auth';
+import { getSessionOnServer } from '@/lib/auth-server';
 import { headers } from 'next/headers';
 
 
@@ -13,19 +13,17 @@ interface AuthUser {
 }
 
 interface MongoProperty {
-    _id: string | { $oid: string };
+    id: string;
     title: string;
     type: string;
     price: number;
     location: string;
     status: string;
-    image: string;
+    image?: string | null;
 }
 
 const MyProperties = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const session = await getSessionOnServer()
 
     const user = session?.user as AuthUser | undefined;
 
@@ -72,9 +70,9 @@ const MyProperties = async () => {
                                 <tbody className="divide-y divide-gray-50 text-sm">
                                     {rawProperties.map((property, index) => {
                                         // Safe ID parsing to bypass build deployment blockers
-                                        const propId = property._id && typeof property._id === 'object' && '$oid' in property._id
-                                            ? property._id.$oid
-                                            : String(property._id);
+                                        const propId = property.id && typeof property.id === 'object'
+                                            ? property.id
+                                            : String(property.id);
 
                                         return (
                                             <tr key={propId || index} className="hover:bg-gray-50/40 transition-colors group">
@@ -82,7 +80,7 @@ const MyProperties = async () => {
                                                 <td className="py-4 px-6 flex items-center gap-4">
                                                     <div className="w-14 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-100">
                                                         <img
-                                                            src={property.image}
+                                                            src={property.image || '/placeholder.png'} // 🟢 Fallback image
                                                             alt={property.title}
                                                             className="w-full h-full object-cover"
                                                         />
@@ -108,8 +106,8 @@ const MyProperties = async () => {
                                                 {/* Status Column */}
                                                 <td className="py-4 px-6">
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border ${property.status === 'available'
-                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
-                                                            : 'bg-amber-50 text-amber-700 border-amber-100'
+                                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                                                        : 'bg-amber-50 text-amber-700 border-amber-100'
                                                         }`}>
                                                         {property.status}
                                                     </span>

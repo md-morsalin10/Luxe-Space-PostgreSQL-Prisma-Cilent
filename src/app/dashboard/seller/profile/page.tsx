@@ -1,8 +1,7 @@
-import React from 'react';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
+
 import { Person, Envelope } from '@gravity-ui/icons';
 import { BiShieldQuarter, BiCalendar, BiSolidBuildingHouse, BiBriefcaseAlt2 } from 'react-icons/bi';
+import { getSessionOnServer } from '@/lib/auth-server';
 
 interface AuthUser {
     id: string;
@@ -13,16 +12,14 @@ interface AuthUser {
 }
 
 const SellerProfile = async () => {
-    const session = await auth.api.getSession({
-        headers: await headers()
-    });
+    const session = await getSessionOnServer()
 
     const user = session?.user as AuthUser | undefined;
 
     return (
         <div className="min-h-screen bg-[#f8fafc] py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
-                
+
                 {/* Header Section */}
                 <div className="mb-8">
                     <h1 className="text-3xl font-serif font-semibold text-[#0f172a] tracking-wide">
@@ -34,15 +31,15 @@ const SellerProfile = async () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    
+
                     {/* Left Column: Avatar & Quick Stats */}
                     <div className="md:col-span-1 flex flex-col gap-6">
                         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
                             <div className="relative w-28 h-28 rounded-full bg-gray-50 border-2 border-[#C9A227]/20 p-1 mb-4 overflow-hidden flex items-center justify-center">
                                 {user?.image ? (
-                                    <img 
-                                        src={user.image} 
-                                        alt={user.name} 
+                                    <img
+                                        src={user.image}
+                                        alt={user.name}
                                         className="w-full h-full object-cover rounded-full"
                                     />
                                 ) : (
@@ -73,7 +70,7 @@ const SellerProfile = async () => {
 
                     {/* Right Column: Detailed Information */}
                     <div className="md:col-span-2 space-y-6">
-                        
+
                         {/* Profile Details Card */}
                         <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                             <h3 className="text-base font-serif font-semibold text-[#0f172a] mb-5 pb-3 border-b border-gray-100 flex items-center gap-2">
@@ -133,7 +130,7 @@ const SellerProfile = async () => {
 
                     </div>
                 </div>
-                
+
             </div>
         </div>
     );

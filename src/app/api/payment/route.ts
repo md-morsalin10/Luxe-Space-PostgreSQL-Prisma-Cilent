@@ -2,7 +2,8 @@ import { NextResponse, NextRequest } from 'next/server';
 import { headers } from 'next/headers';
 import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
-import { auth } from '@/lib/auth';
+import { getSessionOnServer } from '@/lib/auth-server';
+
 
 interface AuthUser {
     id: string;
@@ -13,14 +14,11 @@ interface AuthUser {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-    try {
+    try { 
         const headersList = await headers();
         const origin = headersList.get('origin');
 
-        // ১. এটি আপনার অথ সেশন (নাম অপরিবর্তিত থাকল)
-        const session = await auth.api.getSession({
-            headers: headersList
-        });
+        const session = await getSessionOnServer()
         const user = session?.user as AuthUser | undefined;
 
         console.log("=== CHECKING USER SESSION DETAILS ===", user);
@@ -83,7 +81,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             cancel_url: `${origin || ""}/properties/${propertyId || ""}`,
         };
 
-        // ২. এখানে নাম পরিবর্তন করে checkoutSession করা হয়েছে যেন সংঘর্ষ না হয়
+       
         const checkoutSession = await stripe.checkout.sessions.create(sessionParams);
 
         if (!checkoutSession.url) {

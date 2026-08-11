@@ -7,8 +7,10 @@ const PropertyPage = async () => {
     const allProperty = await getAllProperties();
     console.log(allProperty, "property")
     
-    const properties: Property[] = allProperty?.data || [];
-   
+    const properties: Property[] = (allProperty || []).map(p => ({
+        ...p,
+        image: p.image || '',
+    })) as Property[];
 
     return <PropertiesClient initialProperties={properties} />;
 };

@@ -6,7 +6,7 @@ import { FiMaximize } from 'react-icons/fi';
 
 
 export interface Property {
-  _id: string;
+  id: string;
   title: string;
   type: string;
   price: number;
