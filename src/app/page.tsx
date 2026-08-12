@@ -13,7 +13,7 @@ export default function Home() {
     <div>
        <Banner/>
        <ExclusiveHighlighted/>
-       {/* <FeaturesSection/> */}
+       <FeaturesSection/>
        <About/>
        <Services/>
        <Testimonials/>

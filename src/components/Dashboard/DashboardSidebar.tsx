@@ -56,16 +56,22 @@ export default function DashboardSideBar() {
   // 🚪 ফিক্সড লগআউট ফাংশন (onMouseDown এর জন্য ইভেন্ট টাইপ হ্যান্ডলিং)
   const handleLogout = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    e.stopPropagation(); // বাবলিং সম্পূর্ণ ব্লক করা হলো
+    e.stopPropagation();
     
     setIsMenuOpen(false);
     setIsDrawerOpen(false);
 
     try {
       await authClient.signOut();
-      router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
+    } finally {
+      // Always clear client storage and redirect — suspended users must be able to log out.
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+      }
+      router.push("/");
     }
   };
 

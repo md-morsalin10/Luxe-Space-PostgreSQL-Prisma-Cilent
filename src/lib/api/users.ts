@@ -9,6 +9,7 @@ export interface AppUser {
     role: "buyer" | "seller" | "admin";
     createdAt: string;
     updatedAt?: string;
+    isSuspended?: boolean;
 }
 
 export const getUsers = async (): Promise<AppUser[]> => {

@@ -8,6 +8,7 @@ interface SessionUser {
   name?: string;
   email: string;
   role: "admin" | "seller" | "buyer";
+  isSuspended?: boolean;
 }
 
 export const getUserSession = async (): Promise<SessionUser | null> => {
@@ -24,6 +25,11 @@ export const verifyRole = async (
 
   if (!user) {
     redirect("/login");
+  }
+
+  // Block suspended users from accessing dashboards
+  if ((user as any).isSuspended === true) {
+    redirect("/suspended");
   }
 
   if (user.role !== role) {

@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BiBuildingHouse, BiMap, BiBed, BiBath, BiArea, BiTrash, BiSearch, BiFilterAlt, BiBadgeCheck, BiInfoCircle } from 'react-icons/bi';
+import { BiMap, BiBed, BiBath, BiArea, BiTrash, BiSearch, BiFilterAlt, BiBadgeCheck } from 'react-icons/bi';
 import gsap from 'gsap';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 
 interface Property {
     id: string;
@@ -30,10 +32,13 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
     const [properties, setProperties] = useState<Property[]>(initialProperties);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.fromTo(".property-row", 
+            gsap.fromTo(".property-row",
                 { opacity: 0, y: 15 },
                 { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }
             );
@@ -41,17 +46,46 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
         return () => ctx.revert();
     }, [searchQuery, statusFilter]);
 
-    const handleDeleteProperty = (id: string) => {
-        if (confirm("Are you sure you want to remove this property listing?")) {
-            setProperties(prev => prev.filter(p => p.id !== id));
+    const router = useRouter();
+    const baseUrl = process.env.NEXT_PUBLIC_URL || "";
+
+    const handleOpenDeleteModal = (id: string) => {
+        setSelectedPropertyId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!selectedPropertyId) return;
+        setIsDeleting(true);
+
+        try {
+            const res = await fetch(`${baseUrl}/api/property/${selectedPropertyId}`, {
+                method: 'DELETE'
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                toast.success('Property deleted successfully!');
+                setProperties(prev => prev.filter(p => p.id !== selectedPropertyId));
+                setIsDeleteModalOpen(false);
+                setSelectedPropertyId(null);
+                router.refresh();
+            } else {
+                toast.error(data.message || 'Failed to delete property');
+            }
+        } catch (error) {
+            toast.error('An error occurred while deleting the property.');
+        } finally {
+            setIsDeleting(false);
         }
     };
 
-    // ফিল্টারিং ও সার্চিং লজিক
+
     const filteredProperties = properties.filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              p.sellerEmail.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            p.sellerEmail.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || p.status === statusFilter;
         return matchesSearch && matchesStatus;
     });
@@ -59,7 +93,7 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
     return (
         <div ref={containerRef} className="min-h-screen bg-[#F9FAFB] text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                
+
                 {/* হেডার সেকশন */}
                 <div className="mb-10 border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
@@ -137,9 +171,9 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                                             <td className="py-4 px-6 max-w-sm">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-16 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative">
-                                                        <img 
-                                                            src={property.image} 
-                                                            alt={property.title} 
+                                                        <img
+                                                            src={property.image}
+                                                            alt={property.title}
                                                             className="w-full h-full object-cover"
                                                         />
                                                     </div>
@@ -195,8 +229,8 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
 
                                             <td className="py-4 px-6 text-right">
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <button 
-                                                        onClick={() => handleDeleteProperty(property.id)}
+                                                    <button
+                                                        onClick={() => handleOpenDeleteModal(property.id)}
                                                         className="p-2 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors border border-transparent hover:border-rose-100"
                                                         title="Delete Property"
                                                     >
@@ -213,6 +247,47 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                 </div>
 
             </div>
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                    <div className="bg-[#0B1329] border border-amber-500/20 rounded-2xl shadow-2xl p-6 text-white max-w-md w-full relative">
+                        <button
+                            onClick={() => setIsDeleteModalOpen(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
+                            aria-label="Close delete confirmation"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="text-center">
+                            <h3 className="text-xl font-bold bg-gradient-to-r from-amber-200 to-amber-500 bg-clip-text text-transparent mb-2">
+                                Delete Property?
+                            </h3>
+                            <p className="text-gray-300 text-sm mb-6">
+                                Are you sure you want to permanently delete this property? This action cannot be undone.
+                            </p>
+                            <div className="flex justify-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsDeleteModalOpen(false)}
+                                    className="border border-gray-600 text-gray-300 hover:bg-white/5 px-5 py-2 rounded-xl text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleConfirmDelete}
+                                    disabled={isDeleting}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl text-sm font-medium shadow-lg shadow-red-600/30 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                                >
+                                    {isDeleting ? 'Deleting...' : 'Yes, Delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

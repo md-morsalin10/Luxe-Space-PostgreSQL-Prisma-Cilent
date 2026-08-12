@@ -27,9 +27,16 @@ const NavbarProfileDropdown: React.FC = () => {
     const handleSignOut = async (): Promise<void> => {
         try {
             await signOut();
-            router.push("/");
         } catch (error) {
             console.error("Sign out failed:", error);
+        } finally {
+            // Force-clear client-side storage and redirect regardless of API result.
+            // This ensures suspended users (or any user) can always log out.
+            if (typeof window !== 'undefined') {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+            router.push("/");
         }
     };
 

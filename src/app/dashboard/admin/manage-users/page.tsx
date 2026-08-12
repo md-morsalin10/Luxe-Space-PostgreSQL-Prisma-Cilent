@@ -16,6 +16,7 @@ const ManageAllUsers = async () => {
         image:         user.image || '',
         createdAt:     user.createdAt || '',
         role:          user.role as "buyer" | "seller" | "admin",
+        isSuspended:   user.isSuspended ?? false,
     }));
 
     return <ManageUsersClient initialUsers={formattedUsers as never} />;
