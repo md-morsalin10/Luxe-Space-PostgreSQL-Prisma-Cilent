@@ -5,12 +5,3 @@ export const authClient = createAuthClient({
 })
 
 export const { signIn, signUp, useSession, signOut } = authClient
-
-// Example of how to use these in your components:
-// const handleLogin = async (email, password) => {
-//   await signIn.email({ email, password })
-// }
-//
-// const handleRegister = async (name, email, password) => {
-//   await signUp.email({ name, email, password })
-// }

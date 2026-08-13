@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Swal from 'sweetalert2';
+import { getTokenFromClient } from '@/lib/core/token-client';
 
 export default function EditPropertyPage() {
   const router = useRouter();
@@ -22,7 +23,7 @@ export default function EditPropertyPage() {
     image: '',
     status: 'available'
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [notFound, setNotFound] = useState(false);
@@ -33,7 +34,7 @@ export default function EditPropertyPage() {
     const fetchProperty = async () => {
       try {
         const res = await fetch(`${baseUrl}/api/property/${propertyId}`);
-        
+
         if (res.status === 404) {
           setNotFound(true);
           setLoading(false);
@@ -41,10 +42,10 @@ export default function EditPropertyPage() {
         }
 
         const data = await res.json();
-        
+
         if (res.ok && data && data.success !== false) {
           // If the backend wraps response in data.data or returns it directly
-          const prop = data.data || data; 
+          const prop = data.data || data;
           setFormData({
             title: prop.title || '',
             type: prop.type || 'villa',
@@ -67,7 +68,7 @@ export default function EditPropertyPage() {
         setLoading(false);
       }
     };
-    
+
     fetchProperty();
   }, [propertyId, baseUrl]);
 
@@ -79,16 +80,21 @@ export default function EditPropertyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
+    const token = await getTokenFromClient()
+    console.log("🔑 Client-side Token:", token);
     try {
       const res = await fetch(`${baseUrl}/api/property/${propertyId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          "authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
-           ...formData,
-           price: Number(formData.price),
-           bedrooms: Number(formData.bedrooms),
-           bathrooms: Number(formData.bathrooms),
-           area: Number(formData.area),
+          ...formData,
+          price: Number(formData.price),
+          bedrooms: Number(formData.bedrooms),
+          bathrooms: Number(formData.bathrooms),
+          area: Number(formData.area),
         })
       });
       const data = await res.json();
@@ -99,7 +105,7 @@ export default function EditPropertyPage() {
           icon: 'success',
           background: '#0B1329',
           color: '#fff',
-          customClass: { 
+          customClass: {
             popup: 'border border-emerald-500/20 rounded-2xl shadow-2xl',
             confirmButton: 'bg-[#C9A227] hover:bg-[#b08d22] text-white font-medium py-2 px-6 rounded-xl shadow-lg transition-all',
           },
@@ -109,11 +115,11 @@ export default function EditPropertyPage() {
         router.refresh();
       } else {
         Swal.fire({
-            title: 'Error',
-            text: data.message || 'Failed to update property',
-            icon: 'error',
-            background: '#0B1329',
-            color: '#fff'
+          title: 'Error',
+          text: data.message || 'Failed to update property',
+          icon: 'error',
+          background: '#0B1329',
+          color: '#fff'
         });
       }
     } catch (error) {
@@ -184,7 +190,7 @@ export default function EditPropertyPage() {
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            
+
             {/* Title */}
             <div className="sm:col-span-2">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">Property Title</label>

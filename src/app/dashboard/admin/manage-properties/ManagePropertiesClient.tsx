@@ -35,7 +35,6 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
     useEffect(() => {
         const ctx = gsap.context(() => {
             gsap.fromTo(".property-row",
@@ -167,7 +166,7 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                                 ) : (
                                     filteredProperties.map((property) => (
                                         <tr key={property.id} className="property-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
-                                            {/* ইমেজ ও টাইটেল */}
+                                            {/* ইমেজ ও টাইটেল */}   
                                             <td className="py-4 px-6 max-w-sm">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-16 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative">

@@ -1,11 +1,18 @@
-// Core server fetch utility.
-// Type definitions have been moved to @/types/property — import from there.
-// This file keeps the `serverFetch` helper and re-exports the Property type
-// so existing imports of `Property` from this path keep working.
+import { getTokenFromServer } from "./seassion";
+
 
 export type { Property, Seller } from "@/types/property";
 
 const baseUrl = process.env.NEXT_PUBLIC_URL;
+
+
+const ServerAuthHeader = async () => {
+  const token = await getTokenFromServer()
+  const headers = {
+    authorization: `Bearer ${token}`
+  }
+  return token ? headers : {}
+}
 
 export const serverFetch = async <T = unknown>(path: string): Promise<T> => {
   if (!baseUrl) {
@@ -16,6 +23,7 @@ export const serverFetch = async <T = unknown>(path: string): Promise<T> => {
 
   const res = await fetch(`${baseUrl}${path}`, {
     cache: "no-store",
+    
   });
 
   if (!res.ok) {

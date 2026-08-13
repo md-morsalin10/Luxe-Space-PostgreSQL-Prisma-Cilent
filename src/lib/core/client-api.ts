@@ -1,5 +1,7 @@
 "use client";
 
+import { getTokenFromClient } from "./token-client";
+
 export interface PropertySeller {
     id: string;
     name: string;
@@ -20,8 +22,8 @@ export interface Property {
     image?: string | null;
     status: string;
     dateUploaded: string;
-    sellerId: string;           // 👈 Prisma schema অনুযায়ী sellerId
-    seller?: PropertySeller;     // 👈 Prisma schema অনুযায়ী seller
+    sellerId: string;
+    seller?: PropertySeller;
     buyerId?: string | null;
     createdAt: string;
     updatedAt: string;
@@ -32,17 +34,27 @@ export interface Property {
 const baseUrl = process.env.NEXT_PUBLIC_URL || "";
 
 
+export const ClientAuthHeader = async () => {
+    const token = await getTokenFromClient()
+    const headers = {
+        authorization: `Bearer ${token}`
+    }
+    return token ? headers : {}
+}
+
+
 export const clientMutation = async (path: string, data: any) => {
     const response = await fetch(`${baseUrl}${path}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ... await ClientAuthHeader()
         },
         body: JSON.stringify(data),
     });
 
     if (!response.ok) {
-       
+
         const errorData = await response.json().catch(() => null);
         console.error("Backend Response Error:", errorData);
         throw new Error(errorData?.message || `Mutation failed on ${path}`);

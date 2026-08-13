@@ -1,6 +1,4 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { authClient } from "../auth-client"; 
 import { getSessionOnServer } from "../auth-server";
 
 interface SessionUser {
@@ -12,9 +10,13 @@ interface SessionUser {
 }
 
 export const getUserSession = async (): Promise<SessionUser | null> => {
-  // Server-side এ headers পাস করেgetSession নিতে হয়
   const session = await getSessionOnServer()
   return (session?.user as SessionUser) || null;
+};
+
+export const getTokenFromServer = async (): Promise<SessionUser | null> => {
+  const session = await getSessionOnServer()
+  return (session?.session?.token as any) || null;
 };
 
 export const verifyRole = async (
