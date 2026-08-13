@@ -6,7 +6,7 @@ export const getPropertyBySellerId = async ({ sellerId }: { sellerId: string }):
 };
 
 export const getAllProperties = async (): Promise<Property[]> => {
-    return protectedServerFetch<Property[]>(`/api/property`);
+    return serverFetch<Property[]>(`/api/property`);
 };
 
 export const getPropertyById = async ({ propertyId }: { propertyId: string }): Promise<Property | null> => {

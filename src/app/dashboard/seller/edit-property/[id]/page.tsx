@@ -33,7 +33,12 @@ export default function EditPropertyPage() {
 
     const fetchProperty = async () => {
       try {
-        const res = await fetch(`${baseUrl}/api/property/${propertyId}`);
+        const token = await getTokenFromClient();
+        const res = await fetch(`${baseUrl}/api/property/${propertyId}`, {
+          headers: {
+            "authorization": `Bearer ${token}`
+          }
+        });
 
         if (res.status === 404) {
           setNotFound(true);

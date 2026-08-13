@@ -5,6 +5,7 @@ import { FiEdit3, FiTrash2, FiEye, FiAlertTriangle } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
+import { getTokenFromClient } from '@/lib/core/token-client';
 
 interface PropertyActionsProps {
   propertyId: string;
@@ -27,8 +28,12 @@ const PropertyActions: React.FC<PropertyActionsProps> = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
+      const token = await getTokenFromClient();
       const res = await fetch(`${baseUrl}/api/property/${propertyId}`, {
         method: 'DELETE',
+        headers: {
+          "authorization": `Bearer ${token}`
+        }
       });
 
       const data = await res.json();

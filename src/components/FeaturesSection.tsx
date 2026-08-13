@@ -11,7 +11,7 @@ const FeaturesSection = async () => {
 
   // Map from the canonical API Property shape to PropertyCard's Property shape.
   // The API uses `id` (Prisma UUID string), not MongoDB's `_id`.
-  const formattedProperties: Property[] = (featuresData || []).map((item) => ({
+  const formattedProperties: Property[] = (Array.isArray(featuresData) ? featuresData : []).map((item) => ({
     id:          item.id,
     title:       item.title,
     type:        item.type,
