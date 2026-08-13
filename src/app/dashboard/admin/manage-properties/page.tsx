@@ -29,7 +29,7 @@ const ManageAllProperties = async () => {
     const properties = Array.isArray(rawData) ? rawData : [];
 
     const formattedProperties: Property[] = properties.map((p: any) => ({
-        id: String(p._id?.$oid || p._id || p.id || ""),
+        id: String(p.id || ""),
         title: p.title || "",
         type: p.type || "",
         price: Number(p.price) || 0,

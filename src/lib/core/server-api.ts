@@ -15,22 +15,20 @@ const ServerAuthHeader = async () => {
 }
 
 export const serverFetch = async <T = unknown>(path: string): Promise<T> => {
-  if (!baseUrl) {
-    throw new Error(
-      "NEXT_PUBLIC_URL environment variable is not set. Cannot fetch from the API server."
-    );
-  }
-
   const res = await fetch(`${baseUrl}${path}`, {
     cache: "no-store",
-    
+
   });
 
-  if (!res.ok) {
-    throw new Error(
-      `Failed to fetch from ${path} — HTTP ${res.status} ${res.statusText}`
-    );
-  }
+  return res.json() as Promise<T>;
+};
+
+export const protectedServerFetch = async <T = unknown>(path: string): Promise<T> => {
+  const res = await fetch(`${baseUrl}${path}`, {
+    cache: "no-store",
+    headers: await ServerAuthHeader()
+
+  });
 
   return res.json() as Promise<T>;
 };

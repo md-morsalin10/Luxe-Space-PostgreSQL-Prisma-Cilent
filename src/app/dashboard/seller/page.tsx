@@ -11,10 +11,7 @@ const SellerDashboard = async () => {
     if (!session) {
         return null;
     }
-    // const token = await getTokenFromServer()
-    
-    // console.log(session?.session?.token, "get user season")
-    // console.log(token, "get token function")
+ 
 
     const seller   = session?.user as AuthUser | undefined;
     const sellerId = seller?.id as string;

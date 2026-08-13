@@ -5,6 +5,8 @@ import { BiUserCheck, BiShieldQuarter, BiSearch, BiFilterAlt } from 'react-icons
 import { FiSlash, FiCheckCircle } from 'react-icons/fi';
 import gsap from 'gsap';
 import { toast } from 'react-hot-toast';
+import { ClientAuthHeader } from '@/lib/core/client-api';
+
 
 interface User {
     id: string;
@@ -28,7 +30,7 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.fromTo(".user-row", 
+            gsap.fromTo(".user-row",
                 { opacity: 0, y: 15 },
                 { opacity: 1, y: 0, duration: 0.4, stagger: 0.05, ease: "power2.out" }
             );
@@ -46,7 +48,10 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
         try {
             const res = await fetch(`${baseUrl}/api/users/${user.id}/suspend`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...await ClientAuthHeader()
+                },
                 body: JSON.stringify({ isSuspended: newStatus }),
             });
             const data = await res.json();
@@ -70,8 +75,8 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
     };
 
     const filteredUsers = users.filter(user => {
-        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                              user.email.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesFilter = roleFilter === 'all' || user.role === roleFilter;
         return matchesSearch && matchesFilter;
     });
@@ -79,7 +84,7 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
     return (
         <div ref={containerRef} className="min-h-screen bg-[#F9FAFB] text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
-                
+
                 {/* Header */}
                 <div className="mb-10 border-b border-slate-200 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div>
@@ -158,9 +163,9 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
                                             <td className="py-4 px-6 flex items-center gap-3">
                                                 <div className="relative w-9 h-9 shrink-0">
                                                     <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
-                                                        <img 
-                                                            src={user.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"} 
-                                                            alt={user.name} 
+                                                        <img
+                                                            src={user.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80"}
+                                                            alt={user.name}
                                                             className={`w-full h-full object-cover ${user.isSuspended ? 'grayscale opacity-60' : ''}`}
                                                             onError={(e) => {
                                                                 (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80";
@@ -203,13 +208,12 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
 
                                             {/* Role */}
                                             <td className="py-4 px-6">
-                                                <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
-                                                    user.role === 'admin' 
-                                                    ? 'bg-slate-900 text-white' 
-                                                    : user.role === 'seller' 
-                                                    ? 'bg-[#C9A227]/10 text-[#A68015] border border-[#C9A227]/20' 
-                                                    : 'bg-slate-100 text-slate-600'
-                                                }`}>
+                                                <span className={`inline-block text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${user.role === 'admin'
+                                                    ? 'bg-slate-900 text-white'
+                                                    : user.role === 'seller'
+                                                        ? 'bg-[#C9A227]/10 text-[#A68015] border border-[#C9A227]/20'
+                                                        : 'bg-slate-100 text-slate-600'
+                                                    }`}>
                                                     {user.role}
                                                 </span>
                                             </td>
@@ -246,13 +250,12 @@ const ManageUsersClient = ({ initialUsers }: { initialUsers: User[] }) => {
                                                         onClick={() => handleToggleSuspend(user)}
                                                         disabled={togglingId === user.id}
                                                         title={user.isSuspended ? "Unsuspend Account" : "Suspend Account"}
-                                                        className={`flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-all border shadow-sm ${
-                                                            togglingId === user.id
-                                                                ? 'opacity-60 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400'
-                                                                : user.isSuspended
+                                                        className={`flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded-lg transition-all border shadow-sm ${togglingId === user.id
+                                                            ? 'opacity-60 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400'
+                                                            : user.isSuspended
                                                                 ? 'bg-emerald-50 text-emerald-600 border-emerald-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600'
                                                                 : 'bg-red-50 text-red-600 border-red-100 hover:bg-red-600 hover:text-white hover:border-red-600'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {togglingId === user.id ? (
                                                             <span className="w-3.5 h-3.5 border-2 border-current/30 border-t-current rounded-full animate-spin" />

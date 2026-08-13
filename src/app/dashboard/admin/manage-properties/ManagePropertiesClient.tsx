@@ -5,6 +5,7 @@ import { BiMap, BiBed, BiBath, BiArea, BiTrash, BiSearch, BiFilterAlt, BiBadgeCh
 import gsap from 'gsap';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
+import { ClientAuthHeader } from '@/lib/core/client-api';
 
 interface Property {
     id: string;
@@ -57,9 +58,15 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
         if (!selectedPropertyId) return;
         setIsDeleting(true);
 
+
         try {
             const res = await fetch(`${baseUrl}/api/property/${selectedPropertyId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    "Content-Type": "application/json",
+                    ... await ClientAuthHeader()
+                },
+
             });
 
             const data = await res.json();
@@ -166,7 +173,7 @@ const ManagePropertiesClient = ({ initialProperties }: { initialProperties: Prop
                                 ) : (
                                     filteredProperties.map((property) => (
                                         <tr key={property.id} className="property-row opacity-0 hover:bg-slate-50/50 transition-all duration-200">
-                                            {/* ইমেজ ও টাইটেল */}   
+                                            {/* ইমেজ ও টাইটেল */}
                                             <td className="py-4 px-6 max-w-sm">
                                                 <div className="flex items-center gap-4">
                                                     <div className="w-16 h-12 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0 relative">

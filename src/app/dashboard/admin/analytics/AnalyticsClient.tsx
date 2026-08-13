@@ -6,7 +6,7 @@ import { BiLineChart, BiTrendingUp, BiCompass, BiPieChartAlt2 } from 'react-icon
 import gsap from 'gsap';
 
 interface PropertyData {
-    _id: string;
+    id: string;
     price: number;
     status: "available" | "sold";
     type: string;
@@ -33,7 +33,7 @@ const AnalyticsClient = ({ properties, users }: AnalyticsClientProps) => {
     const totalSoldRevenue = soldProperties.reduce((acc, curr) => acc + curr.price, 0);
     const avgPropertyPrice = totalProperties > 0 ? Math.round(properties.reduce((acc, curr) => acc + curr.price, 0) / totalProperties) : 0;
 
-    // ২. চার্ট ১ ডাটা (Radar Chart): প্রোপার্টি টাইপের গড় আর্কিটেকচারাল সাইজ ও স্পেস অ্যানালিটিক্স
+
     const typeGroup = properties.reduce((acc: any, curr) => {
         if (!acc[curr.type]) {
             acc[curr.type] = { count: 0, totalArea: 0, totalBeds: 0, totalBaths: 0 };
@@ -47,12 +47,12 @@ const AnalyticsClient = ({ properties, users }: AnalyticsClientProps) => {
 
     const radarChartData = Object.keys(typeGroup).map(type => ({
         subject: type.toUpperCase(),
-        Area: Math.round(typeGroup[type].totalArea / typeGroup[type].count / 10), // স্কেলিংয়ের সুবিধার্থে ১০ দিয়ে ভাগ
-        Beds: Math.round((typeGroup[type].totalBeds / typeGroup[type].count) * 100), // স্কেলিংয়ের সুবিধার্থে ১০০ দিয়ে গুণ
+        Area: Math.round(typeGroup[type].totalArea / typeGroup[type].count / 10), 
+        Beds: Math.round((typeGroup[type].totalBeds / typeGroup[type].count) * 100), 
         Baths: Math.round((typeGroup[type].totalBaths / typeGroup[type].count) * 100)
     }));
 
-    // ৩. চার্ট ২ ডাটা (Bar Chart): টাইপ অনুযায়ী লিস্টিং বনাম সোল্ড রেশিও
+
     const salesDistribution = Object.keys(typeGroup).map(type => {
         const typeListings = properties.filter(p => p.type === type);
         const typeSold = typeListings.filter(p => p.status === 'sold');
@@ -97,7 +97,6 @@ const AnalyticsClient = ({ properties, users }: AnalyticsClientProps) => {
                     </div>
                 </div>
 
-                {/* কুইক অ্যানালিটিক্যাল স্ট্যাটস */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div className="analytic-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex items-center justify-between">
                         <div>
@@ -134,10 +133,8 @@ const AnalyticsClient = ({ properties, users }: AnalyticsClientProps) => {
                     </div>
                 </div>
 
-                {/* চার্ট সেকশন */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
-                    {/* বামের চার্ট: সেলস বনাম লিস্টিং রেশিও (Bar Chart) */}
                     <div className="chart-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
                         <div className="mb-6">
                             <h3 className="text-sm font-bold text-slate-900">Inventory Liquidation</h3>
@@ -162,7 +159,6 @@ const AnalyticsClient = ({ properties, users }: AnalyticsClientProps) => {
                         </div>
                     </div>
 
-                    {/* ডানের চার্ট: আর্কিটেকচারাল মেট্রিকেশনস (Radar Chart) */}
                     <div className="chart-card opacity-0 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.01)]">
                         <div className="mb-6">
                             <h3 className="text-sm font-bold text-slate-900">Architectural Proportionality</h3>

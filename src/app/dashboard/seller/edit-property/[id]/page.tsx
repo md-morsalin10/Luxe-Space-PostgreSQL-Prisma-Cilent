@@ -81,7 +81,7 @@ export default function EditPropertyPage() {
     e.preventDefault();
     setSubmitting(true);
     const token = await getTokenFromClient()
-    console.log("🔑 Client-side Token:", token);
+    // console.log("🔑 Client-side Token:", token);
     try {
       const res = await fetch(`${baseUrl}/api/property/${propertyId}`, {
         method: 'PUT',
