@@ -17,7 +17,7 @@ export const DemoLoginButtons: React.FC<DemoLoginButtonsProps> = ({ loading, onI
         <button 
           type="button"
           disabled={loading}
-          onClick={() => onInstantLogin('seller@gmail.com', 'Morsalin501921')}
+          onClick={() => onInstantLogin('selller@gmail.com', 'Morsalin501921')}
           className="py-2.5 px-1 text-center bg-[#1e293b] hover:bg-[#0f172a] text-white rounded-lg text-[11px] font-semibold tracking-wide shadow-sm transition-all active:scale-[0.97] cursor-pointer disabled:opacity-50"
         >
           Seller
@@ -25,7 +25,7 @@ export const DemoLoginButtons: React.FC<DemoLoginButtonsProps> = ({ loading, onI
         <button 
           type="button"
           disabled={loading}
-          onClick={() => onInstantLogin('afsan@gmail.com', 'Morsalin501921')}
+          onClick={() => onInstantLogin('buyer@gmail.com', 'Morsalin501921')}
           className="py-2.5 px-1 text-center bg-[#1e293b] hover:bg-[#0f172a] text-white rounded-lg text-[11px] font-semibold tracking-wide shadow-sm transition-all active:scale-[0.97] cursor-pointer disabled:opacity-50"
         >
           Buyer
@@ -33,7 +33,7 @@ export const DemoLoginButtons: React.FC<DemoLoginButtonsProps> = ({ loading, onI
         <button 
           type="button"
           disabled={loading}
-          onClick={() => onInstantLogin('admin@gmail.com', 'Admin@123')}
+          onClick={() => onInstantLogin('admin@gmail.com', 'Morsalin501921')}
           className="py-2.5 px-1 text-center bg-amber-700 hover:bg-amber-800 text-white rounded-lg text-[11px] font-semibold tracking-wide shadow-sm transition-all active:scale-[0.97] cursor-pointer disabled:opacity-50"
         >
           Admin
