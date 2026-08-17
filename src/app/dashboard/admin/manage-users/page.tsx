@@ -1,6 +1,5 @@
 import { getUsers } from '@/lib/api/users';
 import type { AppUser } from '@/lib/api/users';
-import React from 'react';
 import ManageUsersClient from './ManageUsersClient';
 
 const ManageAllUsers = async () => {
