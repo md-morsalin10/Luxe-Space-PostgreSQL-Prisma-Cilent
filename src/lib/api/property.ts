@@ -14,5 +14,5 @@ export const getPropertyById = async ({ propertyId }: { propertyId: string }): P
 };
 
 export const getFeaturesProperty = async (): Promise<Property[]> => {
-    return protectedServerFetch<Property[]>(`/api/features/properties`);
+    return serverFetch<Property[]>(`/api/features/properties`);
 };
